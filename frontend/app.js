@@ -47,6 +47,17 @@ function openCustomModal(title, message, isConfirm = false, onConfirmCallback = 
     });
 }
 
+// 3. GUARDIA DE AUTENTIFICACION (Manipulacion de Modales de flujo)
+function checkAuth() {
+    if (!AUTHOR) {
+        loginModal.classList.add('active');
+    } else {
+        loginModal.classList.remove('active');
+        currentUserText.textContent = AUTHOR;
+        fetchTasks(); // Cargamos las tareas solo si ya esta identificado
+    }
+}
+
 // 3.1 ESCUCHADOR PARA EL FORMULARIO INTERNO DEL MODAL LOGIN
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -56,7 +67,7 @@ loginForm.addEventListener('submit', (e) => {
         AUTHOR = name;
         localStorage.setItem('todo_author_session', AUTHOR);
         loginModal.classList.remove('active');
-        currentUserText.TexContent = AUTHOR;
+        currentUserText.textContent = AUTHOR;
         fetchtask();
     } else {
         openCustomModal('validacion', 'por favor ingresa un nombre valido (minimo 2 caracteres).', false)
