@@ -2,7 +2,7 @@
 const API_URL = 'http://localhost:3000/tasks';
 
 // Intentamos leer si ya existe un nombre guardado en el disco del navegador
-let autor = localStorage.getItem('todo_author_session');
+let AUTHOR = localStorage.getItem('todo_author_session');
 
 // 2. CAPTURA CENTRALIZADA DE ELEMENTOS DEL DOM
 const currentUserText = document.getElementById('currentUser');
@@ -16,8 +16,8 @@ const tasksContainer = document.getElementById('tasksContainer');
 const customModal = document.getElementById('customModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalMessage = document.getElementById('modalMessage');
-const modalCancelBtn = document.getElementById('modalCancelBtn');
-const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+let modalCancelBtn = document.getElementById('modalCancelBtn');
+let modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
 const loginModal = document.getElementById('loginModal');
 const loginForm = document.getElementById('loginForm');
@@ -36,6 +36,9 @@ function openCustomModal(title, message, isConfirm = false, onConfirmCallback = 
 
     modalConfirmBtn.parentNode.replaceChild(nuevoConfirmBtn, modalConfirmBtn);
     modalCancelBtn.parentNode.replaceChild(nuevoCancelBtn, modalCancelBtn);
+
+    modalConfirmBtn = nuevoConfirmBtn;
+    modalCancelBtn = nuevoCancelBtn;
 
     nuevoConfirmBtn.addEventListener('click', () => {
         customModal.classList.remove('active');
@@ -61,26 +64,26 @@ function checkAuth() {
 // 3.1 ESCUCHADOR PARA EL FORMULARIO INTERNO DEL MODAL LOGIN
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = loginInput.ariaValueMax.trim();
+    const name = loginInput.value.trim();
 
     if (name && name.length >= 2) {
         AUTHOR = name;
         localStorage.setItem('todo_author_session', AUTHOR);
         loginModal.classList.remove('active');
         currentUserText.textContent = AUTHOR;
-        fetchtask();
+        fetchTasks();
     } else {
         openCustomModal('validacion', 'por favor ingresa un nombre valido (minimo 2 caracteres).', false)
     }
 });
 
 // 4. LEER TAREAS DESDE MYSQL (GET)
-async function fetchtask() {
+async function fetchTasks() {
     try {
         const response = await fetch(API_URL);
         const json = await response.json();
 
-        if (json.success == 'success' && json.data.tasks) {
+        if (json.status === 'success' && json.data.tasks) {
             renderTasks(json.data.tasks);
         }
     } catch (error) {
@@ -100,7 +103,7 @@ function renderTasks(tasks) {
 
     tasks.forEach((task) => {
         const taskCard = document.createElement('div');
-        taskCard.className = `task-card ${task.completed ? 'completed' : ''}`;
+        taskCard.className = `task-card ${task.is_completed ? 'completed' : ''}`;
 
         const setHtmlModoLectura = () => {
             taskCard.innerHTML = `
@@ -110,13 +113,13 @@ function renderTasks(tasks) {
                 <span class="author">Autor: ${task.author}</span>
             </div>
             <div class="task-actions" style="display: flex; gap: 5px;">
-                <button class="btn-edit" style="background-color: #2563eb; font-size: 0.85rem; width: auto; padding: 5px 10 px; color: white; border: none; border-radius: 4px; cursor: pointer,">Editar</button>
-                <button class="btn-delete" style="background-color: #dc2626; font-size: 0.85rem; width: auto; padding: 5px 10 px; color: white; border: none; border-radius: 4px; cursor: pointer,">Eliminar</button>
+                <button class="btn-edit" style="background-color: #2563eb; font-size: 0.85rem; width: auto; padding: 5px 10px; color: white; border: none; border-radius: 4px; cursor: pointer;">Editar</button>
+                <button class="btn-delete" style="background-color: #dc2626; font-size: 0.85rem; width: auto; padding: 5px 10px; color: white; border: none; border-radius: 4px; cursor: pointer;">Eliminar</button>
             </div>
         `;
 
         taskCard.querySelector('.btn-delete').addEventListener('click', () => deleteTask(task.id, task.author));
-        taskCard.querySelector('.btn-edit').addEventListener('click', () => cambiarAModoEdicion(task, taskcard));
+        taskCard.querySelector('.btn-edit').addEventListener('click', () => cambiarAModoEdicion(task, taskCard));
         };
 
         setHtmlModoLectura();
@@ -127,7 +130,7 @@ function renderTasks(tasks) {
 // 5.1 INTERFAZ DINAMICA: MODO EDICION INLINE
 function cambiarAModoEdicion(task, taskCard) {
     if (AUTHOR !== task.author) {
-        openCustomModal('Acceso Restringido', '¡No autorizado¨! Esta tarea le pertencese a "${task.author}" y tu eres "${AUTHOR}".', false);
+        openCustomModal('Acceso Restringido', `¡No autorizado! Esta tarea le pertenece a "${task.author}" y tú eres "${AUTHOR}".`, false);
         return;
     }
 

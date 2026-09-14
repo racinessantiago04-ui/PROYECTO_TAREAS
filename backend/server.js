@@ -90,8 +90,8 @@ const server = http.createServer(async (req, res) => {
     return;
     }
 
-    // RUTA 3: Actualizar tarea existente (PUT /task/:id)
-    if (req.url.startsWith('/task/') && req.method === 'PUT') {
+    // RUTA 3: Actualizar tarea existente (PUT /tasks/:id)
+    if (req.url.startsWith('/tasks/') && req.method === 'PUT') {
         const urlParts = req.url.split('/');
         const taskId = urlParts[2];
 
@@ -114,7 +114,7 @@ const server = http.createServer(async (req, res) => {
         // 2. Regla de negocio: Validar propiedad del autor
         if (rows[0].author !== author) {
             res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: 'error', message: 'No autorizado. La tarea es de ${rows[0].author}' }));
+            res.end(JSON.stringify({ status: 'error', message: `No autorizado. La tarea es de ${rows[0].author}` }));
             return;
         }
 
@@ -133,8 +133,8 @@ const server = http.createServer(async (req, res) => {
     }
 
 
-// RUTA 4: eliminar tarea (DELETE /task/:id)
-if (req.url.startsWith('/task/') && req.method === 'DELETE') {
+// RUTA 4: eliminar tarea (DELETE /tasks/:id)
+if (req.url.startsWith('/tasks/') && req.method === 'DELETE') {
     const urlParts = req.url.split('/');
     const taskId = urlParts[2];
 
@@ -159,7 +159,7 @@ if (req.url.startsWith('/task/') && req.method === 'DELETE') {
             // Logica de proteccion: comparamos el author del JSON con el autor de la fila de MSQL
             if (task.author !== author) {
                 res.writeHead(403, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ status: 'error', message: 'No autorizado. La tarea es de ${task.author}' }));
+                res.end(JSON.stringify({ status: 'error', message: `No autorizado. La tarea es de ${task.author}` }));
                 return;
             }
 
@@ -183,5 +183,5 @@ res.end(JSON.stringify({ status: 'error', message: 'Endpoint no encontrado' }));
 
 const PORT = 3000;
 server.listen(PORT, () => {
-console.log(' servidor Vanilla con MySQL real corriendo en http://localhost:${PORT}');
+console.log(`servidor Vanilla con MySQL real corriendo en http://localhost:${PORT}`);
 });
